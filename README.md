@@ -1,0 +1,253 @@
+# Insight Interviewer
+
+The Interview Agent
+
+Build the interviewer, not the interview.
+
+The Situation
+
+The ABTalks AI Cohort is a 31-day enterprise AI engineering program covering modern AI topics including:
+
+Retrieval-Augmented Generation (RAG)
+
+Vector Databases
+
+Prompt Engineering
+
+Agentic AI
+
+Model Context Protocol (MCP)
+
+AI Deployment
+
+Production AI Systems
+
+After completing the cohort, learners should be able to confidently explain the systems they built and the engineering decisions behind them.
+
+However, preparing for technical interviews and effectively communicating this knowledge remains one of the biggest challenges.
+
+Your task is to build an AI Interview Agent that conducts personalized technical interviews based on a candidate's learning journey throughout the cohort.
+
+Your Challenge
+
+Design and build an AI agent capable of conducting a realistic, multi-turn technical interview.
+
+The interview should:
+
+Assess the candidate's understanding of the concepts they have completed.
+
+Adapt naturally throughout the conversation.
+
+Ask intelligent follow-up questions.
+
+Maintain context across the interview.
+
+Provide actionable feedback at the end.
+
+The overall experience should resemble a real technical interview rather than a scripted questionnaire.
+
+What You're Given
+
+Every team will receive the following resources:
+
+1. Curriculum
+
+A structured JSON containing the complete 31-day AI Cohort curriculum, including:
+
+Modules
+
+Daily topics
+
+Learning objectives
+
+Tools used throughout the program
+
+2. Candidate Profiles
+
+A collection of candidate profiles describing each participant's progress through the cohort, including:
+
+Completed missions
+
+Attempts
+
+Skipped topics
+
+Learning signals
+
+3. Technical Specification
+
+A separate document defining:
+
+Required API contract
+
+Submission requirements
+
+Request/response formats
+
+Minimum Requirements
+
+Your solution must:
+
+Conduct a conversational technical interview.
+
+Ask a minimum of 8 questions covering at least 4 different curriculum days.
+
+Generate follow-up questions based on previous responses.
+
+Maintain conversation context throughout the interview.
+
+Produce structured feedback at the end of the interview.
+
+Expose the required HTTP endpoint defined in the Technical Specification.
+
+You are free to choose any:
+
+AI models
+
+Frameworks
+
+Agent orchestration strategy
+
+Retrieval pipeline
+
+System architecture
+
+Out of Scope
+
+The following are not required:
+
+Voice interaction
+
+User authentication
+
+Persistent user accounts
+
+Long-term conversation history
+
+Mobile applications
+
+Notes
+
+All curriculum and candidate data provided for this challenge are synthetic and intended solely for the hackathon.
+
+Teams may use any AI models, agent frameworks, vector databases, or supporting technologies.
+
+Creativity in interview flow, reasoning, interaction design, and overall user experience is highly encouraged.
+
+Attached Resources
+
+Curriculum JSON
+
+Candidate Profiles
+
+Technical Specification
+
+
+This is my hackathon problem now first i want to build only landing page . take refernce from the image for making of landing page 
+Create a premium, futuristic, cinematic AI product landing page.
+
+The visual quality should feel like a polished AI startup that could be presented at a major hackathon or startup demo.
+
+Design inspiration:
+
+Premium AI SaaS
+
+Futuristic intelligence
+
+Dark cinematic interfaces
+
+High-end product design
+
+Subtle 3D
+
+Glassmorphism
+
+Neural networks
+
+Data visualization
+
+Intelligent systems
+
+Minimal but visually impressive
+
+The page should feel:
+
+Intelligent → Premium → Futuristic → Technical → Confident
+
+Avoid making it look like:
+
+A generic ChatGPT clone
+
+A basic SaaS template
+
+A generic dashboard
+
+A robotics website
+
+A crypto website
+
+An overly neon cyberpunk website
+
+The visual language should communicate:
+
+An AI that listens, thinks, adapts and probes deeper.
+
+🎨 COLOR PALETTE
+
+Use a dark premium background.
+
+Primary:
+
+Deep black
+
+Near-black navy
+
+Very dark indigo
+
+Accent colors:
+
+Electric violet
+
+Indigo
+
+Cyan
+
+Soft blue
+
+Typography:
+
+White
+
+Off-white
+
+Muted gray
+
+Use gradients carefully.
+
+Avoid excessive neon.
+
+The overall appearance should be elegant rather than flashy.
+
+
+i want the landing page in 3d animation that looks asthetic and you can add details from problem statement to make the landing page
+
+This project was built with [Lovable](https://lovable.dev).
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6f90b7ab-e1dc-492d-9397-b54fe27ff0d3).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+
+```sh
+git clone <this-repository-url>
+cd <repository-name>
+npm i
+npm run dev
+```
