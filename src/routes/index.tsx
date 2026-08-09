@@ -207,46 +207,8 @@ function AnalyzingBadge() {
 }
 
 function Hero3DVisual() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Mouse Parallax Values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [6, -6]), {
-    stiffness: 120,
-    damping: 20,
-  });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), {
-    stiffness: 120,
-    damping: 20,
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setPrefersReducedMotion(mediaQuery.matches);
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current || prefersReducedMotion) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY, prefersReducedMotion]);
-
   return (
-    <div
-      ref={containerRef}
-      className="relative flex min-h-[580px] sm:min-h-[640px] w-full items-center justify-center select-none overflow-hidden rounded-3xl border border-[#66B2D6]/25 bg-[#0A0D14]/95 p-4 sm:p-6 pb-7 sm:pb-9 shadow-[0_0_55px_rgba(0,0,0,0.85)] backdrop-blur-2xl"
-    >
+    <div className="relative flex min-h-[580px] sm:min-h-[640px] w-full items-center justify-center select-none overflow-hidden rounded-3xl border border-[#66B2D6]/25 bg-[#0A0D14]/95 p-4 sm:p-6 pb-7 sm:pb-9 shadow-[0_0_55px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
       {/* Subtle Background Watermark Text */}
       <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-mono text-7xl sm:text-8xl font-black text-[#66B2D6]/[0.04] select-none tracking-tighter uppercase">
         PROBE
@@ -262,22 +224,8 @@ function Hero3DVisual() {
       {/* Ambient Floating Particles */}
       <div className="pointer-events-none absolute inset-0 opacity-35">
         {[...Array(6)].map((_, i) => (
-          <motion.div
+          <div
             key={i}
-            animate={
-              prefersReducedMotion
-                ? {}
-                : {
-                    y: ["0px", "-140px"],
-                    opacity: [0, 0.85, 0],
-                  }
-            }
-            transition={{
-              duration: 4 + i * 1.2,
-              repeat: Infinity,
-              delay: i * 0.7,
-              ease: "linear",
-            }}
             className="absolute h-1.5 w-1.5 rounded-full bg-[#66B2D6] shadow-[0_0_8px_#66B2D6]"
             style={{
               left: `${12 + i * 15}%`,
@@ -287,36 +235,12 @@ function Hero3DVisual() {
         ))}
       </div>
 
-      {/* 3D PARALLAX STAGE */}
-      <motion.div
-        style={
-          prefersReducedMotion
-            ? {}
-            : {
-                rotateX,
-                rotateY,
-                transformStyle: "preserve-3d",
-              }
-        }
-        animate={
-          prefersReducedMotion
-            ? {}
-            : {
-                y: [-4, 4, -4],
-              }
-        }
-        transition={{
-          y: { duration: 6, ease: "easeInOut", repeat: Infinity },
-        }}
-        className="relative flex h-full w-full flex-col justify-between gap-5 py-2"
-      >
+      {/* CARD CONTAINER */}
+      <div className="relative flex h-full w-full flex-col justify-between gap-5 py-2">
         {/* MAIN STAGE: LEFT COLUMN | CENTER OVAL MIRROR | RIGHT COLUMN */}
         <div className="grid w-full grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4.5 items-center">
           {/* ── LEFT COLUMN (4 COLS) ── */}
-          <div
-            className="lg:col-span-4 flex flex-col gap-3.5 z-20 min-w-0"
-            style={{ transform: "translateZ(30px)" }}
-          >
+          <div className="lg:col-span-4 flex flex-col gap-3.5 z-20 min-w-0">
             {/* HEADLINE & TAGLINE */}
             <div className="space-y-1">
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-[0_0_14px_rgba(102,178,214,0.8)]">
@@ -351,16 +275,10 @@ function Hero3DVisual() {
               {/* Waveform Strip */}
               <div className="mt-2.5 flex h-3.5 items-center gap-0.5">
                 {[40, 85, 55, 100, 70, 45, 90].map((h, idx) => (
-                  <motion.div
+                  <div
                     key={idx}
-                    animate={{ height: [`${h}%`, `${100 - h}%`, `${h}%`] }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: Infinity,
-                      delay: idx * 0.12,
-                      ease: "easeInOut",
-                    }}
                     className="w-1 rounded-full bg-[#66B2D6]"
+                    style={{ height: `${h}%` }}
                   />
                 ))}
               </div>
@@ -402,21 +320,14 @@ function Hero3DVisual() {
           </div>
 
           {/* ── CENTER OVAL MIRROR (4 COLS - COMPACT NO OVERLAP) ── */}
-          <div
-            className="lg:col-span-4 flex flex-col items-center justify-center relative z-10 py-2"
-            style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}
-          >
+          <div className="lg:col-span-4 flex flex-col items-center justify-center relative z-10 py-2">
             {/* OVERLAPPING "ANALYZING 78%" BADGE */}
             <AnalyzingBadge />
 
             {/* OVAL MIRROR CAPSULE */}
             <div className="relative flex h-[315px] sm:h-[355px] w-[185px] sm:w-[210px] items-center justify-center rounded-[50%/40%] border-[2.5px] border-[#66B2D6] bg-gradient-to-b from-[#111827] via-[#0A0D14] to-[#0A0D14] shadow-[0_0_40px_rgba(102,178,214,0.45),inset_0_0_22px_rgba(102,178,214,0.25)] overflow-hidden">
               {/* Laser Scan Line moving up and down */}
-              <motion.div
-                animate={{ y: ["-150px", "150px", "-150px"] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute left-0 right-0 z-30 h-0.5 bg-gradient-to-r from-transparent via-[#66B2D6] to-transparent shadow-[0_0_12px_#66B2D6]"
-              />
+              <div className="pointer-events-none absolute left-0 right-0 z-30 h-0.5 bg-gradient-to-r from-transparent via-[#66B2D6] to-transparent shadow-[0_0_12px_#66B2D6]" />
 
               {/* Glass Glare Reflection Beam */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent z-20" />
@@ -430,22 +341,7 @@ function Hero3DVisual() {
               </svg>
 
               {/* ── ETHEREAL GLOWING PARTICLE SILHOUETTE FIGURE ── */}
-              <motion.div
-                animate={
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        scale: [1, 1.025, 1],
-                        opacity: [0.9, 1, 0.9],
-                      }
-                }
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="relative z-10 flex items-center justify-center"
-              >
+              <div className="relative z-10 flex items-center justify-center">
                 <svg
                   viewBox="0 0 200 240"
                   className="h-44 sm:h-52 w-36 sm:w-44 drop-shadow-[0_0_20px_rgba(56,189,248,0.6)]"
@@ -504,14 +400,7 @@ function Hero3DVisual() {
                       r={idx % 2 === 0 ? "2.2" : "1.6"}
                       fill="#38BDF8"
                       opacity={0.9}
-                    >
-                      <animate
-                        attributeName="opacity"
-                        values="0.4;1;0.4"
-                        dur={`${2.5 + (idx % 3) * 0.6}s`}
-                        repeatCount="indefinite"
-                      />
-                    </circle>
+                    />
                   ))}
 
                   {/* Facial Reticle & Keypoint Alignments */}
@@ -537,7 +426,7 @@ function Hero3DVisual() {
                     opacity="0.6"
                   />
                 </svg>
-              </motion.div>
+              </div>
 
               {/* BOTTOM HUD OVERLAY BAR INSIDE MIRROR */}
               <div className="absolute bottom-2.5 inset-x-2.5 z-20 flex flex-col items-center rounded-xl border border-[#66B2D6]/40 bg-[#0A0D14]/90 p-2 backdrop-blur-md shadow-lg">
@@ -549,16 +438,10 @@ function Hero3DVisual() {
                 {/* Waveform Bars */}
                 <div className="mt-1 flex h-3 items-center gap-0.5">
                   {[30, 75, 100, 50, 85, 60, 95, 40, 80, 45, 90].map((h, idx) => (
-                    <motion.div
+                    <div
                       key={idx}
-                      animate={{ height: [`${h}%`, `${100 - h}%`, `${h}%`] }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        delay: idx * 0.08,
-                        ease: "easeInOut",
-                      }}
                       className="w-0.5 rounded-full bg-[#66B2D6]"
+                      style={{ height: `${h}%` }}
                     />
                   ))}
                 </div>
@@ -570,10 +453,7 @@ function Hero3DVisual() {
           </div>
 
           {/* ── RIGHT COLUMN (4 COLS) ("ANALYZING KEY AREAS") ── */}
-          <div
-            className="lg:col-span-4 flex flex-col gap-2.5 z-20 min-w-0"
-            style={{ transform: "translateZ(30px)" }}
-          >
+          <div className="lg:col-span-4 flex flex-col gap-2.5 z-20 min-w-0">
             <span className="font-mono text-xs font-extrabold tracking-wider text-[#66B2D6] uppercase drop-shadow-[0_0_8px_rgba(102,178,214,0.4)]">
               ANALYZING KEY AREAS
             </span>
@@ -642,10 +522,7 @@ function Hero3DVisual() {
         </div>
 
         {/* ── BOTTOM DOCK FOOTER BAR ── */}
-        <div
-          className="w-full rounded-2xl border border-[#66B2D6]/40 bg-[#0D1420]/95 px-4 sm:px-6 py-2.5 backdrop-blur-md shadow-[0_0_25px_rgba(102,178,214,0.18)] flex items-center justify-around z-20 text-xs font-mono text-[#66B2D6] -translate-y-3 mb-2"
-          style={{ transform: "translateZ(20px)" }}
-        >
+        <div className="w-full rounded-2xl border border-[#66B2D6]/40 bg-[#0D1420]/95 px-4 sm:px-6 py-2.5 backdrop-blur-md shadow-[0_0_25px_rgba(102,178,214,0.18)] flex items-center justify-around z-20 text-xs font-mono text-[#66B2D6] -translate-y-3 mb-2">
           <div className="flex items-center gap-1.5">
             <Volume2 className="h-4 w-4 text-[#66B2D6]" />
             <span className="text-white font-extrabold">Voice</span>
@@ -671,7 +548,7 @@ function Hero3DVisual() {
             <span className="text-white font-extrabold">Communication</span>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

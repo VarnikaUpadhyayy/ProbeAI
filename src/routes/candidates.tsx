@@ -14,6 +14,7 @@ import {
   Hexagon,
   Activity,
   ArrowLeft,
+  ChevronDown,
 } from "lucide-react";
 import { candidates, type Candidate } from "@/data/candidateData";
 
@@ -82,9 +83,15 @@ function getInitials(name: string): string {
 function CandidatesPage() {
   const [selected, setSelected] = useState<Candidate | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const visibleCandidates = useMemo(
+    () => (showAll ? candidates : candidates.slice(0, 8)),
+    [showAll]
+  );
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-background">
+    <main className="relative min-h-screen bg-background">
       <LiveBackground />
       <div className="pointer-events-none fixed inset-0 aurora opacity-60" />
       <div className="pointer-events-none fixed inset-0 grid-lines" />
@@ -118,12 +125,23 @@ function CandidatesPage() {
           {/* Left: Hex Grid */}
           <div className="flex-1 min-w-0">
             <HexGrid
-              candidates={candidates}
+              candidates={visibleCandidates}
               selectedId={selected?.member.id ?? null}
               hoveredId={hoveredId}
               onSelect={setSelected}
               onHover={setHoveredId}
             />
+            {!showAll && candidates.length > 8 && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="btn-glow font-mono text-xs font-semibold uppercase tracking-wider cursor-pointer"
+                >
+                  Show More
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right: Telemetry Panel */}
@@ -222,7 +240,7 @@ function HexGrid({
       {/* Hex matrix */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 justify-items-center py-4">
         {cands.map((c, i) => {
-          const pos = HEX_POSITIONS[i] ?? { row: 0, col: 0 };
+          const pos = HEX_POSITIONS[i] ?? { row: Math.floor(i / 4), col: i % 4 };
           const completionRate =
             c.signals.missionsCompleted / c.missions.length;
           const colors = getCompletionColor(completionRate);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LiveBackground } from "@/components/LiveBackground";
 
@@ -20,6 +20,13 @@ export function CinematicEntry({ onComplete }: CinematicEntryProps) {
   const [isExploding, setIsExploding] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
+  const onCompleteRef = useRef(onComplete);
+  const hasCompletedRef = useRef(false);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   // Check prefers-reduced-motion
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -39,26 +46,26 @@ export function CinematicEntry({ onComplete }: CinematicEntryProps) {
       const pct = Math.min(100, Math.floor((elapsed / duration) * 100));
       setProgress(pct);
 
-      if (pct < 30) {
-        setPhraseIndex(0);
-      } else if (pct < 65) {
-        setPhraseIndex(1);
-      } else if (pct < 95) {
-        setPhraseIndex(2);
-      } else {
-        setPhraseIndex(3);
-      }
+      const nextPhrase = pct < 30 ? 0 : pct < 65 ? 1 : pct < 95 ? 2 : 3;
+      setPhraseIndex((prev) => (prev !== nextPhrase ? nextPhrase : prev));
 
       if (pct >= 100) {
         clearInterval(progressInterval);
       }
     }, 30);
 
+    const triggerComplete = () => {
+      if (!hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        onCompleteRef.current?.();
+      }
+    };
+
     // 2. Trigger Boom Sequence at ~2.9s
     const boomTimeout = setTimeout(() => {
       if (prefersReducedMotion) {
         // Simple fade if reduced motion
-        if (onComplete) onComplete();
+        triggerComplete();
       } else {
         // Step A: Anticipation contraction (150ms)
         setIsContracting(true);
@@ -69,7 +76,7 @@ export function CinematicEntry({ onComplete }: CinematicEntryProps) {
           setIsExploding(true);
 
           setTimeout(() => {
-            if (onComplete) onComplete();
+            triggerComplete();
           }, 320);
         }, 150);
       }
@@ -79,7 +86,7 @@ export function CinematicEntry({ onComplete }: CinematicEntryProps) {
       clearInterval(progressInterval);
       clearTimeout(boomTimeout);
     };
-  }, [onComplete, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   // Synapse nodes data (8 radiating directions)
   const synapseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
