@@ -108,12 +108,31 @@ function Nav() {
 
 function CircularProgressBadge({ score }: { score: number }) {
   const [progress, setProgress] = useState(0);
+  const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setProgress(score);
     }, 150);
     return () => clearTimeout(timer);
+  }, [score]);
+
+  useEffect(() => {
+    let current = 0;
+    const duration = 1000;
+    const stepTime = 30;
+    const steps = duration / stepTime;
+    const increment = score / steps;
+    const interval = setInterval(() => {
+      current += increment;
+      if (current >= score) {
+        setDisplayScore(score);
+        clearInterval(interval);
+      } else {
+        setDisplayScore(Math.floor(current));
+      }
+    }, stepTime);
+    return () => clearInterval(interval);
   }, [score]);
 
   const radius = 13;
@@ -145,7 +164,7 @@ function CircularProgressBadge({ score }: { score: number }) {
         />
       </svg>
       <span className="absolute font-mono text-[10px] font-extrabold text-white">
-        {score}%
+        {displayScore}%
       </span>
     </div>
   );
@@ -153,12 +172,31 @@ function CircularProgressBadge({ score }: { score: number }) {
 
 function AnalyzingBadge() {
   const [progress, setProgress] = useState(0);
+  const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setProgress(78);
     }, 200);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let current = 0;
+    const duration = 1000;
+    const stepTime = 30;
+    const steps = duration / stepTime;
+    const increment = 78 / steps;
+    const interval = setInterval(() => {
+      current += increment;
+      if (current >= 78) {
+        setDisplayScore(78);
+        clearInterval(interval);
+      } else {
+        setDisplayScore(Math.floor(current));
+      }
+    }, stepTime);
+    return () => clearInterval(interval);
   }, []);
 
   const radius = 14;
@@ -191,7 +229,7 @@ function AnalyzingBadge() {
           />
         </svg>
         <span className="absolute font-mono text-[9px] font-extrabold text-white">
-          78%
+          {displayScore}%
         </span>
       </div>
       <div className="flex flex-col pr-1">
@@ -224,8 +262,18 @@ function Hero3DVisual() {
       {/* Ambient Floating Particles */}
       <div className="pointer-events-none absolute inset-0 opacity-35">
         {[...Array(6)].map((_, i) => (
-          <div
+          <motion.div
             key={i}
+            animate={{
+              y: ["0px", "-140px"],
+              opacity: [0, 0.85, 0],
+            }}
+            transition={{
+              duration: 4 + i * 1.2,
+              repeat: Infinity,
+              delay: i * 0.7,
+              ease: "linear",
+            }}
             className="absolute h-1.5 w-1.5 rounded-full bg-[#66B2D6] shadow-[0_0_8px_#66B2D6]"
             style={{
               left: `${12 + i * 15}%`,
@@ -236,7 +284,11 @@ function Hero3DVisual() {
       </div>
 
       {/* CARD CONTAINER */}
-      <div className="relative flex h-full w-full flex-col justify-between gap-5 py-2">
+      <motion.div
+        animate={{ y: [-4, 4, -4] }}
+        transition={{ y: { duration: 6, ease: "easeInOut", repeat: Infinity } }}
+        className="relative flex h-full w-full flex-col justify-between gap-5 py-2"
+      >
         {/* MAIN STAGE: LEFT COLUMN | CENTER OVAL MIRROR | RIGHT COLUMN */}
         <div className="grid w-full grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4.5 items-center">
           {/* ── LEFT COLUMN (4 COLS) ── */}
@@ -260,8 +312,10 @@ function Hero3DVisual() {
             {/* CARD 1: LIVE INTERVIEW */}
             <div className="rounded-xl border border-[#66B2D6]/35 bg-[#0D1420]/90 p-3.5 backdrop-blur-md shadow-md transition duration-300 hover:border-[#66B2D6]/80">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-[#66B2D6]/25 text-[#66B2D6]">
+                <div className="relative flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-[#66B2D6]/25 text-[#66B2D6]">
                   <Mic className="h-4 w-4" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-cyan animate-ping" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-cyan" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="font-mono text-xs font-extrabold text-white tracking-wider truncate">
@@ -275,10 +329,16 @@ function Hero3DVisual() {
               {/* Waveform Strip */}
               <div className="mt-2.5 flex h-3.5 items-center gap-0.5">
                 {[40, 85, 55, 100, 70, 45, 90].map((h, idx) => (
-                  <div
+                  <motion.div
                     key={idx}
+                    animate={{ height: [`${h}%`, `${100 - h}%`, `${h}%`] }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      delay: idx * 0.12,
+                      ease: "easeInOut",
+                    }}
                     className="w-1 rounded-full bg-[#66B2D6]"
-                    style={{ height: `${h}%` }}
                   />
                 ))}
               </div>
@@ -327,7 +387,11 @@ function Hero3DVisual() {
             {/* OVAL MIRROR CAPSULE */}
             <div className="relative flex h-[315px] sm:h-[355px] w-[185px] sm:w-[210px] items-center justify-center rounded-[50%/40%] border-[2.5px] border-[#66B2D6] bg-gradient-to-b from-[#111827] via-[#0A0D14] to-[#0A0D14] shadow-[0_0_40px_rgba(102,178,214,0.45),inset_0_0_22px_rgba(102,178,214,0.25)] overflow-hidden">
               {/* Laser Scan Line moving up and down */}
-              <div className="pointer-events-none absolute left-0 right-0 z-30 h-0.5 bg-gradient-to-r from-transparent via-[#66B2D6] to-transparent shadow-[0_0_12px_#66B2D6]" />
+              <motion.div
+                animate={{ y: ["-150px", "150px", "-150px"] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute left-0 right-0 z-30 h-0.5 bg-gradient-to-r from-transparent via-[#66B2D6] to-transparent shadow-[0_0_12px_#66B2D6]"
+              />
 
               {/* Glass Glare Reflection Beam */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent z-20" />
@@ -341,7 +405,18 @@ function Hero3DVisual() {
               </svg>
 
               {/* ── ETHEREAL GLOWING PARTICLE SILHOUETTE FIGURE ── */}
-              <div className="relative z-10 flex items-center justify-center">
+              <motion.div
+                animate={{
+                  scale: [1, 1.025, 1],
+                  opacity: [0.9, 1, 0.9],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="relative z-10 flex items-center justify-center"
+              >
                 <svg
                   viewBox="0 0 200 240"
                   className="h-44 sm:h-52 w-36 sm:w-44 drop-shadow-[0_0_20px_rgba(56,189,248,0.6)]"
@@ -400,12 +475,23 @@ function Hero3DVisual() {
                       r={idx % 2 === 0 ? "2.2" : "1.6"}
                       fill="#38BDF8"
                       opacity={0.9}
-                    />
+                    >
+                      <animate
+                        attributeName="opacity"
+                        values="0.4;1;0.4"
+                        dur={`${2.5 + (idx % 3) * 0.6}s`}
+                        repeatCount="indefinite"
+                      />
+                    </circle>
                   ))}
 
                   {/* Facial Reticle & Keypoint Alignments */}
                   <circle cx="86" cy="72" r="3" fill="#FFFFFF" />
                   <circle cx="114" cy="72" r="3" fill="#FFFFFF" />
+                  <circle cx="100" cy="72" r="3.5" fill="#38BDF8">
+                    <animate attributeName="r" values="2.5;4.5;2.5" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+                  </circle>
                   <line
                     x1="80"
                     y1="72"
@@ -426,7 +512,7 @@ function Hero3DVisual() {
                     opacity="0.6"
                   />
                 </svg>
-              </div>
+              </motion.div>
 
               {/* BOTTOM HUD OVERLAY BAR INSIDE MIRROR */}
               <div className="absolute bottom-2.5 inset-x-2.5 z-20 flex flex-col items-center rounded-xl border border-[#66B2D6]/40 bg-[#0A0D14]/90 p-2 backdrop-blur-md shadow-lg">
@@ -438,10 +524,16 @@ function Hero3DVisual() {
                 {/* Waveform Bars */}
                 <div className="mt-1 flex h-3 items-center gap-0.5">
                   {[30, 75, 100, 50, 85, 60, 95, 40, 80, 45, 90].map((h, idx) => (
-                    <div
+                    <motion.div
                       key={idx}
+                      animate={{ height: [`${h}%`, `${100 - h}%`, `${h}%`] }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        delay: idx * 0.08,
+                        ease: "easeInOut",
+                      }}
                       className="w-0.5 rounded-full bg-[#66B2D6]"
-                      style={{ height: `${h}%` }}
                     />
                   ))}
                 </div>
@@ -548,7 +640,7 @@ function Hero3DVisual() {
             <span className="text-white font-extrabold">Communication</span>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

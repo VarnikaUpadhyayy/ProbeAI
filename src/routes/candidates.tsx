@@ -81,7 +81,7 @@ function getInitials(name: string): string {
 
 // ── Main page ────────────────────────────────────────────────
 function CandidatesPage() {
-  const [selected, setSelected] = useState<Candidate | null>(null);
+  const [selected, setSelected] = useState<Candidate | null>(candidates[0] ?? null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
 
@@ -93,30 +93,62 @@ function CandidatesPage() {
   return (
     <main className="relative min-h-screen bg-background">
       <LiveBackground />
-      <div className="pointer-events-none fixed inset-0 aurora opacity-60" />
+      <div className="pointer-events-none fixed inset-0 aurora opacity-80" />
       <div className="pointer-events-none fixed inset-0 grid-lines" />
 
       <div className="relative">
         <CandidateNav />
 
-        {/* Page title */}
+        {/* Page title & Candidate Selector Probe */}
         <section className="mx-auto max-w-7xl px-6 pt-6 pb-2">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
           >
-            <p className="font-mono text-[11px] tracking-[0.35em] text-cyan/80">
-              CANDIDATE SELECTION MATRIX
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-              <span className="text-gradient">Select a candidate</span>{" "}
-              <span className="text-foreground/90">to probe.</span>
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Hover over hexagonal nodes to preview, click to inspect full
-              telemetry, then initialize a personalized AI interview session.
-            </p>
+            <div>
+              <p className="font-mono text-[11px] tracking-[0.35em] text-cyan/80">
+                CANDIDATE SELECTION MATRIX
+              </p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                <span className="text-gradient">Select a candidate</span>{" "}
+                <span className="text-foreground/90">to probe.</span>
+              </h1>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                Select from the dropdown or click a hexagonal node to inspect full
+                telemetry, then initialize a personalized AI interview session.
+              </p>
+            </div>
+
+            {/* Candidate Selector Dropdown */}
+            <div className="flex flex-col gap-1.5 w-full md:w-80 shrink-0">
+              <label className="font-mono text-[10px] uppercase tracking-[0.25em] text-cyan font-semibold">
+                SELECT CANDIDATE PROBE:
+              </label>
+              <div className="relative">
+                <select
+                  value={selected?.member.id ?? ""}
+                  onChange={(e) => {
+                    const chosen = candidates.find((c) => c.member.id === e.target.value);
+                    if (chosen) setSelected(chosen);
+                  }}
+                  className="w-full appearance-none rounded-xl border border-cyan/40 bg-[#0B111D]/90 px-4 py-2.5 pr-10 font-mono text-xs font-semibold text-white shadow-[0_0_20px_rgba(102,178,214,0.15)] backdrop-blur-md focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan/50"
+                >
+                  {candidates.map((c) => {
+                    const passPct = Math.round(
+                      (c.signals.missionsCompleted / c.missions.length) * 100
+                    );
+                    return (
+                      <option key={c.member.id} value={c.member.id} className="bg-[#0B111D] text-white">
+                        {c.member.name} — {c.member.jobRole} ({passPct}% Pass)
+                      </option>
+                    );
+                  })}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan" />
+              </div>
+            </div>
           </motion.div>
         </section>
 
@@ -137,7 +169,7 @@ function CandidatesPage() {
                   onClick={() => setShowAll(true)}
                   className="btn-glow font-mono text-xs font-semibold uppercase tracking-wider cursor-pointer"
                 >
-                  Show More
+                  Show More Candidates ({candidates.length - 8} Remaining)
                   <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
@@ -216,7 +248,7 @@ function HexGrid({
   return (
     <div className="relative">
       {/* Cybernetic grid background */}
-      <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-30">
+      <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 hidden">
         <svg width="100%" height="100%" className="absolute inset-0">
           <defs>
             <pattern
@@ -228,12 +260,12 @@ function HexGrid({
               <path
                 d="M 60 0 L 0 0 0 60"
                 fill="none"
-                stroke="rgba(139,92,246,0.08)"
-                strokeWidth="0.5"
+                stroke="rgba(139,92,246,0)"
+                strokeWidth="0"
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#cyber-grid)" />
+          <rect width="100%" height="100%" fill="none" />
         </svg>
       </div>
 

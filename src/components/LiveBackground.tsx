@@ -172,15 +172,15 @@ export function LiveBackground() {
       proj.sort((a, b) => a.s - b.s);
 
       // Draw light connection lines between nearby code tokens
-      const linkDist = Math.min(width, height) * 0.11;
-      ctx.lineWidth = 0.5;
+      const linkDist = Math.min(width, height) * 0.12;
+      ctx.lineWidth = 0.65;
       for (let i = 0; i < proj.length; i++) {
         const a = proj[i]!;
         for (let j = i + 1; j < i + 6 && j < proj.length; j++) {
           const b = proj[j]!;
           const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d > linkDist) continue;
-          const alpha = (1 - d / linkDist) * 0.06 * ((a.s + b.s) / 2);
+          const alpha = (1 - d / linkDist) * 0.14 * ((a.s + b.s) / 2);
           ctx.strokeStyle = `rgba(102,178,214,${alpha.toFixed(3)})`;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -194,22 +194,22 @@ export function LiveBackground() {
         const p = proj[i]!;
         const particle = pts[p.idx]!;
         const pulse = 0.5 + 0.5 * Math.sin(time * 1.2 + p.idx * 0.7);
-        const depthAlpha = Math.max(0, (p.s - 0.4) * 1.3);
-        // Light, clear opacity range (0.12 to 0.28) for optimal visibility without congestion
-        const alpha = depthAlpha * (0.12 + pulse * 0.16);
+        const depthAlpha = Math.max(0, (p.s - 0.35) * 1.4);
+        // Rich, clear opacity range (0.22 to 0.48) for vibrant background visibility
+        const alpha = depthAlpha * (0.22 + pulse * 0.26);
 
-        if (alpha < 0.02) continue;
+        if (alpha < 0.03) continue;
 
         const [r, g, b] = colors[particle.color]!;
-        const fontSize = Math.max(7, Math.min(12, p.s * 10));
+        const fontSize = Math.max(8, Math.min(13, p.s * 11));
 
         ctx.font = `${fontSize.toFixed(1)}px "IBM Plex Mono", monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        if (p.s > 0.75 && alpha > 0.18) {
-          ctx.shadowColor = `rgba(${r},${g},${b},${(alpha * 0.35).toFixed(3)})`;
-          ctx.shadowBlur = fontSize * 0.5;
+        if (p.s > 0.7 && alpha > 0.16) {
+          ctx.shadowColor = `rgba(${r},${g},${b},${(alpha * 0.5).toFixed(3)})`;
+          ctx.shadowBlur = fontSize * 0.7;
         } else {
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;

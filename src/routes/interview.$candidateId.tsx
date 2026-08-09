@@ -18,6 +18,13 @@ import {
   BarChart3,
   CheckCircle2,
   Loader2,
+  Volume2,
+  Activity,
+  Eye,
+  Zap,
+  TrendingUp,
+  UserCheck,
+  ChevronDown,
 } from "lucide-react";
 import { candidates } from "@/data/candidateData";
 import type { InterviewQuestion } from "@/data/interviewData";
@@ -166,18 +173,7 @@ function InterviewPage() {
       setAiState("thinking");
       setTimeout(() => {
         isSubmittingRef.current = false;
-        if (data.done) {
-          setFeedback(data.feedback ?? null);
-          setPhase("complete");
-          runCompletionSequence();
-          return;
-        }
 
-        setQuestionText(data.reply);
-        setQuestionNum((n) => n + 1);
-        setAnswer("");
-        setDifficulty((d) => Math.min(4, d + (Math.random() > 0.4 ? 1 : -1)));
-        
         // 🔥 Real Score update (Sirf badhega jab sahi ho, ghatega jab galat)
         if (data.score !== undefined) {
           setMetrics((m) => ({
@@ -186,6 +182,18 @@ function InterviewPage() {
             reasoning: Math.max(0, Math.min(100, m.reasoning + data.score!)),
           }));
         }
+
+        // 🔥 Max 8 Questions limit: If data.done or on Q8 submission, finish interview cleanly
+        if (data.done || questionNum >= 8) {
+          setFeedback(data.feedback ?? null);
+          setPhase("feedback");
+          return;
+        }
+
+        setQuestionText(data.reply);
+        setQuestionNum((n) => Math.min(8, n + 1));
+        setAnswer("");
+        setDifficulty((d) => Math.min(4, d + (Math.random() > 0.4 ? 1 : -1)));
 
         setPhase("interview");
         setAiState("speaking");
@@ -240,7 +248,7 @@ function InterviewPage() {
     ? ({ id: `q-${questionNum}`, text: questionText, topic: "AI ENGINEERING", category: "TECHNICAL", difficulty: difficulty <= 1 ? "EASY" : difficulty <= 3 ? "MEDIUM" : "HARD" } as InterviewQuestion)
     : null;
 
-  const totalQuestionsDisplay = Math.max(questionNum, ESTIMATED_TOTAL_QUESTIONS);
+  const totalQuestionsDisplay = 8;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
@@ -295,70 +303,146 @@ function InterviewPage() {
 }
 
 // ── Top HUD ──────────────────────────────────────────────────
-function TopHUD({ questionNum, totalQuestions, time, candidateName, onSubmitInterview }: any) {
+function TopHUD({ questionNum, totalQuestions, time, candidateName, candidateId }: any) {
   return (
-    <div className="hud-bar relative z-30">
-      <div className="flex w-full items-center justify-between px-6 py-3.5">
-        <div className="flex items-center gap-4">
-          <Shield className="h-4 w-4 text-cyan" />
-          <span className="font-mono text-xs font-bold text-cyan">AI INTERVIEW</span>
-          <span className="text-foreground/90 font-mono text-xs">{candidateName.toUpperCase()}</span>
+    <div className="hud-bar relative z-30 bg-[#0A0D14]/90 backdrop-blur-md border-b border-cyan/20">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        {/* Left: Brand + Candidate Selector Dropdown */}
+        <div className="flex items-center gap-3 min-w-0">
+          <Shield className="h-4 w-4 shrink-0 text-cyan" />
+          <span className="font-mono text-xs font-bold text-cyan tracking-wider hidden sm:inline">
+            AI INTERVIEW
+          </span>
+          <span className="text-white/30 hidden sm:inline">•</span>
+
+          {/* Candidate Dropdown Selector */}
+          <div className="relative">
+            <select
+              value={candidateId}
+              onChange={(e) => {
+                window.location.href = `/interview/${e.target.value}`;
+              }}
+              className="appearance-none rounded-lg border border-cyan/30 bg-[#0D1420] px-3 py-1.5 pr-8 font-mono text-xs font-bold text-white shadow-sm transition hover:border-cyan/60 focus:border-cyan focus:outline-none"
+            >
+              {candidates.map((c) => (
+                <option key={c.member.id} value={c.member.id} className="bg-[#0D1420] text-white">
+                  {c.member.name} ({c.member.jobRole})
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-cyan" />
+          </div>
         </div>
+
+        {/* Right: Live stats & timer */}
         <div className="flex items-center gap-4">
           <span className="font-mono text-xs font-medium text-foreground/90">
-            Q <span className="text-cyan font-bold">{String(questionNum).padStart(2, "0")}</span>/{String(totalQuestions).padStart(2, "0")}
+            Q <span className="text-cyan font-bold">{String(questionNum).padStart(2, "0")}</span>/
+            {String(totalQuestions).padStart(2, "0")}
           </span>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="font-mono text-sm font-semibold">{time}</span>
-          <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.5)]" />
-          <span className="font-mono text-xs font-bold text-emerald-400">LIVE</span>
+          <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1">
+            <Clock className="h-3.5 w-3.5 text-cyan" />
+            <span className="font-mono text-xs font-semibold text-white">{time}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.5)] animate-pulse" />
+            <span className="font-mono text-xs font-bold text-emerald-400 tracking-wider">LIVE</span>
+          </div>
         </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan/40 to-transparent" />
     </div>
   );
 }
 
-// ── 🔥 NAYA QUESTION PROGRESS PANEL (Left Side) ──────────────
-function QuestionProgressPanel({ currentNum, total, history }: { currentNum: number; total: number; history: QuestionStatus[] }) {
+// ── 🔥 8-QUESTION TIMELINE JOURNEY PANEL (Left Side) ─────────
+function QuestionProgressPanel({
+  currentNum,
+  total = 8,
+  history,
+}: {
+  currentNum: number;
+  total: number;
+  history: QuestionStatus[];
+}) {
   return (
-    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} className="holo-frame rounded-2xl p-5 sm:p-6 h-full flex flex-col">
-      <p className="font-mono text-xs font-bold tracking-[0.2em] text-cyan/90 mb-5">QUESTION TRACKER</p>
-      <div className="flex flex-col gap-3 overflow-y-auto">
-        {Array.from({ length: total }).map((_, i) => {
-          const qNum = i + 1;
-          const hist = history.find((h) => h.num === qNum);
-          
-          let bgClass = "bg-white/[0.02] border-white/[0.05] text-muted-foreground/40"; 
-          let statusText = "PENDING";
-          let dotColor = "bg-white/20";
+    <motion.div
+      initial={{ opacity: 0, x: -30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="holo-frame rounded-2xl p-5 sm:p-6 h-full flex flex-col justify-between bg-[#0A0D14]/95 border border-[#66B2D6]/25 shadow-xl"
+    >
+      <div>
+        <div className="flex items-center justify-between border-b border-cyan/20 pb-3 mb-4">
+          <p className="font-mono text-xs font-bold tracking-[0.2em] text-cyan uppercase">
+            TIMELINE JOURNEY
+          </p>
+          <span className="font-mono text-[10px] font-semibold text-white/60">
+            8 QUESTIONS
+          </span>
+        </div>
 
-          if (hist) {
-            if (hist.status === "attempted") {
-              bgClass = "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"; // Attempted = Green
-              statusText = "ATTEMPTED";
-              dotColor = "bg-emerald-400";
-            } else if (hist.status === "skipped") {
-              bgClass = "bg-white/[0.05] border-white/[0.1] text-muted-foreground"; // Skipped = No Color
-              statusText = "SKIPPED";
-              dotColor = "bg-muted-foreground";
+        {/* 8-Question Timeline Nodes with connecting line */}
+        <div className="relative flex flex-col gap-2.5">
+          {/* Vertical Connecting Line */}
+          <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan/50 via-cyan/20 to-white/10 z-0" />
+
+          {Array.from({ length: 8 }).map((_, i) => {
+            const qNum = i + 1;
+            const hist = history.find((h) => h.num === qNum);
+
+            let bgClass = "bg-[#0D1420]/80 border-white/10 text-white/40";
+            let statusText = "PENDING";
+            let dotClass = "bg-white/20 border-white/10";
+            let badgeClass = "text-white/40 border-white/10";
+
+            if (hist) {
+              if (hist.status === "attempted") {
+                bgClass = "bg-emerald-500/10 border-emerald-500/40 text-emerald-400";
+                statusText = "ATTEMPTED";
+                dotClass = "bg-emerald-400 border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.6)]";
+                badgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+              } else if (hist.status === "skipped") {
+                bgClass = "bg-amber-500/10 border-amber-500/30 text-amber-400";
+                statusText = "SKIPPED";
+                dotClass = "bg-amber-400 border-amber-300";
+                badgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+              }
+            } else if (qNum === currentNum) {
+              bgClass = "bg-cyan/15 border-cyan/50 text-cyan shadow-[0_0_20px_rgba(34,211,238,0.2)]";
+              statusText = "ACTIVE";
+              dotClass = "bg-cyan border-white shadow-[0_0_12px_rgba(34,211,238,0.8)] animate-pulse";
+              badgeClass = "bg-cyan/25 text-cyan border-cyan/50";
             }
-          } else if (qNum === currentNum) {
-            bgClass = "bg-cyan/10 border-cyan/40 text-cyan shadow-[0_0_15px_rgba(34,211,238,0.15)]";
-            statusText = "IN PROGRESS";
-            dotColor = "bg-cyan animate-pulse";
-          }
 
-          return (
-            <div key={qNum} className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-all ${bgClass}`}>
-              <div className="flex items-center gap-3">
-                <span className={`h-2 w-2 rounded-full ${dotColor}`} />
-                <span className="font-mono text-sm font-bold tracking-wider">Q{String(qNum).padStart(2, "0")}</span>
+            return (
+              <div
+                key={qNum}
+                className={`relative z-10 flex items-center justify-between rounded-xl border px-3.5 py-2.5 transition-all duration-300 ${bgClass}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`h-3 w-3 rounded-full border ${dotClass}`} />
+                  <span className="font-mono text-xs font-bold tracking-wider text-white">
+                    QUESTION {String(qNum).padStart(2, "0")}
+                  </span>
+                </div>
+                <span
+                  className={`rounded-full border px-2 py-0.5 font-mono text-[9px] font-extrabold uppercase tracking-wider ${badgeClass}`}
+                >
+                  {statusText}
+                </span>
               </div>
-              <span className="font-mono text-[9px] uppercase tracking-wider opacity-80">{statusText}</span>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Progress Footer Summary */}
+      <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between font-mono text-[10px] text-muted-foreground">
+        <span>Progress:</span>
+        <span className="font-bold text-cyan">
+          {Math.round((Math.min(currentNum, 8) / 8) * 100)}% Complete
+        </span>
       </div>
     </motion.div>
   );
@@ -389,7 +473,7 @@ function InteractionZone({ inputMode, setInputMode, answer, setAnswer, isRecordi
           <span className="font-mono text-xs font-semibold tracking-wider text-cyan">CANDIDATE • LIVE</span>
         </div>
 
-        {/* 🔥 Mode toggle - Type is First Now */}
+        {/* Mode toggle */}
         <div className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
           <button onClick={() => setInputMode("type")} className={`flex items-center gap-1.5 rounded-md px-3.5 py-1.5 font-mono text-xs font-semibold transition-all ${inputMode === "type" ? "bg-cyan/20 text-cyan border border-cyan/30" : "text-muted-foreground hover:text-foreground"}`}>
             <Keyboard className="h-3.5 w-3.5" /> TYPE
@@ -400,7 +484,7 @@ function InteractionZone({ inputMode, setInputMode, answer, setAnswer, isRecordi
         </div>
       </div>
 
-      {/* 🔥 Type Mode rendered natively first */}
+      {/* Type Mode */}
       {inputMode === "type" && (
         <div className="relative flex-1 flex flex-col mt-2">
           <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="Type your answer here..." className="w-full h-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/30 focus:border-cyan/30 focus:outline-none focus:ring-1 focus:ring-cyan/20" />
@@ -432,15 +516,109 @@ function InteractionZone({ inputMode, setInputMode, answer, setAnswer, isRecordi
   );
 }
 
-// ── Observation Panel & Visuals (Truncated visual filler for snippet) ────────
+// ── 🔥 REFACTORED AI OBSERVATION PANEL (Right Side - 3 SECTIONS) ──
 function ObservationPanel({ metrics, difficulty }: any) {
+  const confidenceScore = Math.min(
+    98,
+    Math.round(
+      (metrics.techDepth * 0.4 + metrics.clarity * 0.3 + metrics.reasoning * 0.3) * 0.85 + 15
+    )
+  );
+
   return (
-    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="holo-frame rounded-2xl p-5 h-full flex flex-col justify-between">
-      <p className="font-mono text-xs font-semibold tracking-[0.2em] text-cyan/90">AI OBSERVATION</p>
-      <div className="mt-5 space-y-4">
-        <MetricBar label="Technical Depth" value={metrics.techDepth} color="bg-cyan" />
-        <MetricBar label="Clarity" value={metrics.clarity} color="bg-emerald-400" />
-        <MetricBar label="Reasoning" value={metrics.reasoning} color="bg-violet-400" />
+    <motion.div
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="holo-frame rounded-2xl p-5 h-full flex flex-col justify-between gap-4 bg-[#0A0D14]/95 border border-[#66B2D6]/25 shadow-xl overflow-y-auto"
+    >
+      {/* Panel Title */}
+      <div className="flex items-center justify-between border-b border-cyan/20 pb-3">
+        <div className="flex items-center gap-2">
+          <Brain className="h-4 w-4 text-cyan" />
+          <span className="font-mono text-xs font-bold tracking-[0.2em] text-cyan uppercase">
+            AI OBSERVATION
+          </span>
+        </div>
+        <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[9px] font-bold text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          ONLINE
+        </span>
+      </div>
+
+      {/* ── SECTION 1: LIVE SPEECH SIGNAL ── */}
+      <div className="rounded-xl border border-cyan/25 bg-[#0D1420]/80 p-3.5 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <Volume2 className="h-3.5 w-3.5 text-cyan" />
+            <span className="font-mono text-[10px] font-extrabold tracking-wider text-white uppercase">
+              1. LIVE SPEECH SIGNAL
+            </span>
+          </div>
+          <span className="font-mono text-[9px] font-bold text-cyan">Active (-18 dB)</span>
+        </div>
+
+        {/* Real-time Waveform Equalizer */}
+        <div className="flex h-7 items-center justify-between gap-1 px-1 bg-[#070A0F] rounded-lg border border-cyan/15 p-1.5">
+          {[45, 80, 60, 100, 75, 90, 50, 85, 65, 95, 40, 70].map((h, idx) => (
+            <motion.div
+              key={idx}
+              animate={{ height: [`${h}%`, `${100 - h}%`, `${h}%`] }}
+              transition={{
+                duration: 0.9,
+                repeat: Infinity,
+                delay: idx * 0.07,
+                ease: "easeInOut",
+              }}
+              className="w-1 rounded-full bg-[#66B2D6]"
+            />
+          ))}
+        </div>
+
+        <div className="mt-2.5 flex items-center justify-between font-mono text-[9px] text-slate-300">
+          <span>Pitch: 210 Hz</span>
+          <span>Clarity: Optimal</span>
+          <span>Noise: &lt;5%</span>
+        </div>
+      </div>
+
+      {/* ── SECTION 2: REAL-TIME ANALYSIS ── */}
+      <div className="rounded-xl border border-cyan/25 bg-[#0D1420]/80 p-3.5 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Activity className="h-3.5 w-3.5 text-cyan" />
+            <span className="font-mono text-[10px] font-extrabold tracking-wider text-white uppercase">
+              2. REAL-TIME ANALYSIS
+            </span>
+          </div>
+          {/* Confidence Badge */}
+          <div className="flex items-center gap-1 rounded-md border border-cyan/40 bg-cyan/15 px-2 py-0.5 font-mono text-[10px] font-extrabold text-cyan">
+            {confidenceScore}% CONFIDENCE
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <MetricBar label="Technical Depth" value={metrics.techDepth} color="bg-cyan" />
+          <MetricBar label="Clarity & Fluency" value={metrics.clarity} color="bg-emerald-400" />
+          <MetricBar label="Reasoning & Logic" value={metrics.reasoning} color="bg-violet-400" />
+        </div>
+      </div>
+
+      {/* ── SECTION 3: BEHAVIORAL SIGNALS ── */}
+      <div className="rounded-xl border border-cyan/25 bg-[#0D1420]/80 p-3.5 backdrop-blur-sm">
+        <div className="flex items-center gap-2 mb-2.5">
+          <Eye className="h-3.5 w-3.5 text-cyan" />
+          <span className="font-mono text-[10px] font-extrabold tracking-wider text-white uppercase">
+            3. BEHAVIORAL SIGNALS
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <BehaviorCard title="Eye Contact" value="94%" subtext="Optimal Focus" color="text-emerald-400" />
+          <BehaviorCard title="Hesitation" value="12%" subtext="Low Pause" color="text-cyan" />
+          <BehaviorCard title="Tone" value="Balanced" subtext="Neutral/Calm" color="text-violet-300" />
+          <BehaviorCard title="Speech Pace" value="142 WPM" subtext="Natural" color="text-amber-300" />
+        </div>
       </div>
     </motion.div>
   );
@@ -449,8 +627,28 @@ function ObservationPanel({ metrics, difficulty }: any) {
 function MetricBar({ label, value, color }: any) {
   return (
     <div>
-      <div className="flex items-center justify-between"><span className="font-mono text-xs font-medium text-foreground/80">{label}</span><span className="font-mono text-xs font-semibold text-foreground">{Math.round(value)} XP</span></div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.08]"><motion.div className={`h-full rounded-full ${color}`} initial={{ width: 0 }} animate={{ width: `${Math.min(100, value)}%` }} /></div>
+      <div className="flex items-center justify-between text-xs font-mono mb-1">
+        <span className="text-slate-200 font-semibold">{label}</span>
+        <span className="text-white font-bold">{Math.round(value)} XP</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-black/60 border border-white/10">
+        <motion.div
+          className={`h-full rounded-full ${color}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(100, Math.max(8, value))}%` }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function BehaviorCard({ title, value, subtext, color }: any) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-[#070A0F]/90 p-2 text-left">
+      <p className="font-mono text-[9px] text-muted-foreground uppercase">{title}</p>
+      <p className={`font-mono text-xs font-bold mt-0.5 ${color}`}>{value}</p>
+      <p className="text-[9px] text-slate-400 truncate">{subtext}</p>
     </div>
   );
 }

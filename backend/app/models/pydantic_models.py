@@ -74,6 +74,7 @@ class InterviewResponse(BaseModel):
     reply: str
     done: bool
     feedback: FeedbackPayload | None = None
+    score: int | None = 0
 
 
 class TranscriptMessage(BaseModel):
@@ -146,6 +147,7 @@ class LLMQuestionResult(BaseModel):
     reply: str
     curriculum_day: int
     is_follow_up: bool = False
+    score: int | None = 0
 
 
 class LLMFollowUpDecision(BaseModel):
@@ -153,22 +155,4 @@ class LLMFollowUpDecision(BaseModel):
     reply: str | None = None
     curriculum_day: int | None = None
     reason: str | None = None
-
-class InterviewResponse(BaseModel):
-    reply: str
-    done: bool
-    feedback: FeedbackPayload | None = None
-    score: int = 0  # 🔥 Naya field for score calculation
-
-class LLMQuestionResult(BaseModel):
-    reply: str
-    curriculum_day: int
-    is_follow_up: bool = False
-    score: int = 0  # 🔥 Naya field
-
-class LLMFollowUpDecision(BaseModel):
-    action: str
-    reply: str | None = None
-    curriculum_day: int | None = None
-    reason: str | None = None
-    score: int = 0  # 🔥 Naya field
+    score: int | None = 0

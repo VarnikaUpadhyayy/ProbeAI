@@ -123,24 +123,6 @@ const QUESTION_JOURNEY: QuestionNode[] = [
     summary: "Precise estimation of low-rank matrix rank selection and compute budgets.",
     aiObservation: "Demonstrated clear understanding of catastrophic forgetting mitigation.",
   },
-  {
-    id: "q9",
-    label: "Q9",
-    topic: "Real-Time Agentic Tool Routing",
-    score: 94,
-    status: "excellent",
-    summary: "Exceptional dynamic tool selection under tight response latency SLA.",
-    aiObservation: "High confidence and optimal execution pathing for complex queries.",
-  },
-  {
-    id: "q10",
-    label: "Q10",
-    topic: "Distributed Inference & KV Caching",
-    score: 85,
-    status: "strong",
-    summary: "Solid breakdown of PagedAttention memory management across GPU clusters.",
-    aiObservation: "Good architectural grasp of high-throughput enterprise serving.",
-  },
 ];
 
 // ── AI Skill Nodes (Constellation) (HARDCODED FOR UI PRESERVATION) ──
@@ -452,7 +434,7 @@ export function DetailedFeedbackPage({
           </div>
           <div className="relative flex items-center justify-between px-3 sm:px-6 pt-7 pb-5 overflow-x-auto">
             <div className="absolute left-6 right-6 top-1/2 h-0.5 -translate-y-1/2 bg-gradient-to-r from-[#4ADE80] via-[#66B2D6] to-[#F5B942] opacity-40 pointer-events-none" />
-            {QUESTION_JOURNEY.map((q) => {
+            {QUESTION_JOURNEY.slice(0, 8).map((q) => {
               const isSelected = selectedQuestion.id === q.id;
               const statusColor = q.status === "excellent" ? "border-[#4ADE80] bg-[#4ADE80]/20 text-[#4ADE80] shadow-[0_0_15px_#4ADE80]" : q.status === "strong" ? "border-[#66B2D6] bg-[#66B2D6]/20 text-[#66B2D6] shadow-[0_0_15px_#66B2D6]" : "border-[#F5B942] bg-[#F5B942]/20 text-[#F5B942] shadow-[0_0_15px_#F5B942]";
               const activeTextCol = q.status === "excellent" ? "text-[#4ADE80]" : q.status === "strong" ? "text-[#66B2D6]" : "text-[#F5B942]";

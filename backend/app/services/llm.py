@@ -25,12 +25,14 @@ class LLMService:
         self,
         system: str,
         messages: list[dict[str, str]],
-        max_tokens: int = 1024,
+        max_tokens: int = 150,
+        temperature: float = 0.1,
     ) -> str:
         chat_messages = [{"role": "system", "content": system}] + messages
         response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=max_tokens,
+            temperature=temperature,
             messages=chat_messages,
         )
         return response.choices[0].message.content
@@ -39,8 +41,17 @@ class LLMService:
         text = text.strip()
         fence_match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
         if fence_match:
-            text = fence_match.group(1)
-        return json.loads(text)
+            text = fence_match.group(1).strip()
+        else:
+            json_object_match = re.search(r"(\{.*\})", text, re.DOTALL)
+            if json_object_match:
+                text = json_object_match.group(1).strip()
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # Fallback cleanup for unescaped newlines/ctrl chars if needed
+            cleaned = re.sub(r"[\x00-\x1F\x7F]", "", text)
+            return json.loads(cleaned)
 
     def build_system_prompt(
         self,
@@ -161,7 +172,7 @@ Respond with JSON only:
 }}"""
 
         messages = conversation + [{"role": "user", "content": prompt}]
-        raw = self._call(system, messages, max_tokens=768)
+        raw = self._call(system, messages, max_tokens=150, temperature=0.1)
         data = self._parse_json(raw)
         return LLMFollowUpDecision.model_validate(data)
 
@@ -186,7 +197,7 @@ Respond with JSON only:
 {{"reply": "<evaluation/correction + new question>", "curriculum_day": {day}, "is_follow_up": false, "score": <int between -10 and 10 based on answer correctness. 0 if skipped>}}"""
 
         messages = conversation + [{"role": "user", "content": prompt}]
-        raw = self._call(system, messages, max_tokens=768)
+        raw = self._call(system, messages, max_tokens=350, temperature=0.2)
         data = self._parse_json(raw)
         return LLMQuestionResult.model_validate(data)
 
@@ -208,7 +219,7 @@ Respond with JSON only:
 {{"reply": "<evaluation/correction of their answer + follow-up question>", "curriculum_day": {day}, "is_follow_up": true, "score": <int between -10 and 10 based on answer correctness. 0 if skipped>}}"""
 
         messages = conversation + [{"role": "user", "content": prompt}]
-        raw = self._call(system, messages, max_tokens=768)
+        raw = self._call(system, messages, max_tokens=350, temperature=0.2)
         data = self._parse_json(raw)
         return LLMQuestionResult.model_validate(data)
 
@@ -238,7 +249,7 @@ Respond with JSON only matching this exact schema:
 Provide at least 2 items in strengths, gaps, and next. Be specific and reference curriculum topics discussed."""
 
         messages = conversation + [{"role": "user", "content": prompt}]
-        raw = self._call(system, messages, max_tokens=1500)
+        raw = self._call(system, messages, max_tokens=600, temperature=0.2)
         data = self._parse_json(raw)
         return FeedbackPayload.model_validate(data)
 

@@ -66,14 +66,14 @@
   --softblue: oklch(0.72 0.075 231);
 
   --gradient-aurora: radial-gradient(
-      60% 70% at 20% 10%,
-      color-mix(in oklab, var(--cyan) 16%, transparent),
+      65% 75% at 20% 10%,
+      color-mix(in oklab, var(--cyan) 28%, transparent),
       transparent 70%
     ),
-    radial-gradient(50% 60% at 85% 25%, color-mix(in oklab, var(--cyan) 12%, transparent), transparent 70%),
-    radial-gradient(70% 70% at 50% 100%, color-mix(in oklab, var(--indigo) 18%, transparent), transparent 70%);
-  --gradient-text: linear-gradient(100deg, oklch(0.99 0 0), color-mix(in oklab, var(--cyan) 80%, white) 45%, var(--cyan));
-  --shadow-glow: 0 0 60px -18px color-mix(in oklab, var(--cyan) 70%, transparent);
+    radial-gradient(55% 65% at 85% 25%, color-mix(in oklab, var(--cyan) 22%, transparent), transparent 70%),
+    radial-gradient(75% 75% at 50% 100%, color-mix(in oklab, var(--indigo) 32%, transparent), transparent 70%);
+  --gradient-text: linear-gradient(100deg, oklch(0.99 0 0), color-mix(in oklab, var(--cyan) 85%, white) 45%, var(--cyan));
+  --shadow-glow: 0 0 60px -18px color-mix(in oklab, var(--cyan) 80%, transparent);
   --shadow-panel: 0 30px 80px -40px oklch(0 0 0 / 95%);
 }
 
@@ -104,17 +104,15 @@
 }
 
 @utility glass {
-  background: color-mix(in oklab, var(--card) 55%, transparent);
+  background: color-mix(in oklab, var(--card) 65%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid color-mix(in oklab, white 9%, transparent);
+  border: 1px solid color-mix(in oklab, white 14%, transparent);
   box-shadow: var(--shadow-panel);
 }
 
 @utility grid-lines {
-  background-image: linear-gradient(color-mix(in oklab, white 4%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, white 4%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(70% 60% at 50% 30%, black, transparent 85%);
+  display: none !important;
+  opacity: 0 !important;
 }
 
 @utility tilt-card {

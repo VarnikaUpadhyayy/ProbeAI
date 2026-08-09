@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -115,52 +116,24 @@ class InterviewService:
         if decision.action == "complete" and can_complete:
             return self._complete_interview(db, session, candidate, analysis, system, conversation)
 
-        score_delta = 0  # 🔥 Default score
+        def _safe_score(obj: Any) -> int:
+            val = getattr(obj, "score", 0)
+            return val if val is not None else 0
 
-        if decision.action == "follow_up" and session.current_day is not None:
-            result = llm_service.generate_follow_up(
-                system, conversation, session.current_day
-            )
-            score_delta = getattr(result, "score", 0)  # 🔥 AI se score nikala
-        elif decision.action == "next_question":
-            next_day = decision.curriculum_day or get_next_planned_day(
-                analysis, days_covered
-            )
-            if next_day is None:
-                if can_complete:
-                    return self._complete_interview(
-                        db, session, candidate, analysis, system, conversation
-                    )
-                next_day = session.current_day or 1
-            result = llm_service.generate_question_for_day(system, conversation, next_day)
-            score_delta = getattr(result, "score", 0)  # 🔥 AI se score nikala
-        else:
-            if can_complete:
-                return self._complete_interview(
-                    db, session, candidate, analysis, system, conversation
-                )
-            if session.current_day is not None:
-                result = llm_service.generate_follow_up(
-                    system, conversation, session.current_day
-                )
-                score_delta = getattr(result, "score", 0)  # 🔥 AI se score nikala
-            else:
-                next_day = get_next_planned_day(analysis, days_covered) or 1
-                result = llm_service.generate_question_for_day(
-                    system, conversation, next_day
-                )
-                score_delta = getattr(result, "score", 0)  # 🔥 AI se score nikala
+        score_delta = _safe_score(decision)
+        reply_text = decision.reply or "Could you elaborate further on your technical implementation strategy?"
+        next_day = decision.curriculum_day or session.current_day or get_next_planned_day(analysis, days_covered) or 1
 
         self._record_assistant_message(
-            db, session_id, result.reply, result.curriculum_day
+            db, session_id, reply_text, next_day
         )
         db.refresh(session)
         self._update_session_progress(
-            db, session, result.curriculum_day, increment_questions=True
+            db, session, next_day, increment_questions=True
         )
 
-        # 🔥 Frontend ko score return kiya
-        return InterviewResponse(reply=result.reply, done=False, score=score_delta)
+        # 🔥 Streamlined Single-Call Interview Response
+        return InterviewResponse(reply=reply_text, done=False, score=score_delta)
 
     def get_session_detail(self, db: Session, session_id: str) -> SessionDetailResponse | None:
         session = self._get_session(db, session_id)
