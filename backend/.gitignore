@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+
+# Database
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+backend/.venv/
+backend/__pycache__/
+backend/.env
+backend/interview.db
+backend/**/__pycache__/cd D:\ProbeAI_Front\ProbeAI
